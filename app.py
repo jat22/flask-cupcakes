@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from models import db, connect_db, Cupcake
 
 app = Flask(__name__)
@@ -22,6 +22,10 @@ def serlialize_cupcake(cupcake):
 		"image" : cupcake.image
 	}
 
+@app.route('/')
+def show_home_page():
+	return	render_template('index.html')
+
 @app.route('/api/cupcakes')
 def list_all_cupcakes():
 	"""Return JSON {'cupcakes' : [{id, flavor, size, rating, image}, ...]"""
@@ -33,7 +37,7 @@ def list_all_cupcakes():
 @app.route('/api/cupcakes/<cupcake_id>')
 def list_single_cupcake(cupcake_id):
 	"""return JSON {'cupake' : {id, flavor, size, rating, image}}"""
-	cupcake = Cupcake.query.get(cupcake_id)
+	cupcake = Cupcake.query.get_or_404(cupcake_id)
 	serialized = serlialize_cupcake(cupcake)
 
 	return jsonify(cupcake = serialized)
@@ -45,7 +49,7 @@ def create_cupcake():
 	flavor = request.json['flavor']
 	size = request.json['size']
 	rating = request.json['rating']
-	image = request.json['image']
+	image = request.json['image'] or None
 
 
 	new_cupcake = Cupcake(flavor = flavor, size = size, rating = rating, image = image)
